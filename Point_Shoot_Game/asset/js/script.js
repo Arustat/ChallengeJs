@@ -24,97 +24,6 @@ let particles = [];
 
 ctx.font = '50px Impact';
 
-
-const numFolders = 8;
-const numImagesPerFolder = 4;
-const allBackgrounds = [];
-
-for (let folder = 1; folder <= numFolders; folder++) {
-    const folderImages = [];
-    for (let imageIndex = 1; imageIndex <= numImagesPerFolder; imageIndex++) {
-        const image = new Image();
-        image.src = `/asset/Clouds/Clouds ${folder}/${imageIndex}.png`;
-        folderImages.push(image);
-    }
-    allBackgrounds.push(folderImages);
-}
-
-window.addEventListener('load', function(){
-    let points = 0;
-    const pointsThreshold = 10; // Change clouds every 10 points (adjust as needed)
-    let currentFolder = 0;
-
-    function updateClouds() {
-        currentFolder = Math.min(Math.floor(points / pointsThreshold), numFolders - 1);
-        layers[0].image = allBackgrounds[currentFolder][0];
-        layers[1].image = allBackgrounds[currentFolder][1];
-        layers[2].image = allBackgrounds[currentFolder][2];
-        layers[3].image = allBackgrounds[currentFolder][3];
-    }
-
-    slider.addEventListener('change', function(e){
-        gameSpeed = e.target.value;
-        showGameSpeed.innerHTML = e.target.value;
-    });
-
-    class Layer {
-        constructor(image, speedModifier){
-            this.x = 0;
-            this.y = 0;
-            this.width  = 2400;
-            this.height = 700;
-            this.image = image;
-            this.speedModifier = speedModifier;
-            this.speed = gameSpeed * this.speedModifier;
-        }
-        
-        update(){
-            this.speed = gameSpeed * this.speedModifier;
-            if (this.x <= -this.width){
-                this.x = 0;
-            }
-            this.x = this.x - this.speed;
-        }
-
-        draw(){
-            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-            ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
-        }
-    }
-
-    // Initial layers setup
-    const layers = [
-        new Layer(allBackgrounds[currentFolder][0], 0.2),
-        new Layer(allBackgrounds[currentFolder][1], 0.4),
-        new Layer(allBackgrounds[currentFolder][2], 0.6),
-        new Layer(allBackgrounds[currentFolder][3], 0.8)
-    ];
-
-    const gameObjects = layers;
-
-    function animate(){
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        gameObjects.forEach(object => {
-            object.update();
-            object.draw();
-        });
-        requestAnimationFrame(animate);
-    }
-
-    function increasePoints(amount) {
-        points += amount;
-        updateClouds();
-    }
-
-    animate();
-
-    setInterval(() => {
-        increasePoints(score); // Increase points by 1 every second
-    }, 1000);
-});
-
-
-
 class Raven {
     constructor() {
         this.spriteWidth = 271;
@@ -227,8 +136,7 @@ function drawScore() {
     ctx.fillStyle = 'black';
     ctx.fillText('Score: ' + score, 50, 75);
     ctx.fillStyle = 'white';
-    ctx.fillText
-    ('Score: ' + score, 55, 80);
+    ctx.fillText('Score: ' + score, 55, 80);
 }
 
 function drawGameOver() {
@@ -255,6 +163,97 @@ window.addEventListener('click', function (e) {
     });
 });
 
+
+const numFolders = 8;
+const numImagesPerFolder = 4;
+const allBackgrounds = [];
+
+for (let folder = 1; folder <= numFolders; folder++) {
+    const folderImages = [];
+    for (let imageIndex = 1; imageIndex <= numImagesPerFolder; imageIndex++) {
+        const image = new Image();
+        image.src = `/asset/Clouds/Clouds ${folder}/${imageIndex}.png`;
+        folderImages.push(image);
+    }
+    allBackgrounds.push(folderImages);
+}
+
+window.addEventListener('load', function(){
+    let points = 0;
+    const pointsThreshold = 10; // Change clouds every 10 points (adjust as needed)
+    let currentFolder = 0;
+
+    function updateClouds() {
+        currentFolder = Math.min(Math.floor(points / pointsThreshold), numFolders - 1);
+        layers[0].image = allBackgrounds[currentFolder][0];
+        layers[1].image = allBackgrounds[currentFolder][1];
+        layers[2].image = allBackgrounds[currentFolder][2];
+        layers[3].image = allBackgrounds[currentFolder][3];
+    }
+
+    slider.addEventListener('change', function(e){
+        gameSpeed = e.target.value;
+        showGameSpeed.innerHTML = e.target.value;
+    });
+
+    class Layer {
+        constructor(image, speedModifier){
+            this.x = 0;
+            this.y = 0;
+            this.width  = 2400;
+            this.height = 700;
+            this.image = image;
+            this.speedModifier = speedModifier;
+            this.speed = gameSpeed * this.speedModifier;
+        }
+        
+        update(){
+            this.speed = gameSpeed * this.speedModifier;
+            if (this.x <= -this.width){
+                this.x = 0;
+            }
+            this.x = this.x - this.speed;
+        }
+
+        draw(){
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
+        }
+    }
+
+    // Initial layers setup
+    const layers = [
+        new Layer(allBackgrounds[currentFolder][0], 0.2),
+        new Layer(allBackgrounds[currentFolder][1], 0.4),
+        new Layer(allBackgrounds[currentFolder][2], 0.6),
+        new Layer(allBackgrounds[currentFolder][3], 0.8)
+    ];
+
+    const gameObjects = layers;
+
+    function animate(){
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        // Appelle la fonction pour dessiner le fond d'écran
+        drawBackground();
+        gameObjects.forEach(object => {
+            object.update();
+            object.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+
+    function increasePoints(amount) {
+        points += amount;
+        updateClouds();
+    }
+
+    animate();
+
+    setInterval(() => {
+        increasePoints(score); // Increase points by 1 every second
+    }, 1000);
+});
+
 function animate(timestamp) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     collisionCtx.clearRect(0, 0, canvas.width, canvas.height);
@@ -268,6 +267,10 @@ function animate(timestamp) {
             return a.width - b.width;
         });
     }
+
+    // Dessine le fond d'écran
+    drawBackground();
+
     drawScore();
     [...particles, ...ravens, ...explosions].forEach(object => object.update(deltatime));
     [...particles, ...ravens, ...explosions].forEach(object => object.draw());
@@ -305,4 +308,3 @@ startButton.addEventListener('click', startGame);
 restartButton.addEventListener('click', startGame);
 
 startButton.style.display = 'block';
-restartButton.style.display = 'none'; // Masquer le bouton Restart au chargement de la page
