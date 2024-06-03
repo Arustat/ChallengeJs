@@ -1,3 +1,44 @@
+const logo = document.getElementById("logo");
+const logoContainer = document.getElementById("logoContainer");
+
+// Fonction pour afficher le bouton de démarrage après l'animation du logo
+function showStartButton() {
+    startButton.style.opacity = '1';
+}
+
+// Animation du logo au chargement de la page
+window.addEventListener('load', function () {
+    // Ajouter la classe pour le fond gris foncé au chargement de la page
+    document.body.classList.add('dark-bg');
+
+    // Affichage du logo avec fondu et effet de zoom
+    logoContainer.style.opacity = '1';
+    logo.style.width = '500px'; // Zoom du logo
+    // Après un court délai, masquer le logo avec fondu
+    setTimeout(function () {
+        // Transition pour afficher le fond coloré avec un fondu
+        document.body.classList.remove('dark-bg');
+
+        logoContainer.style.opacity = '0';
+        // Après l'animation de fondu, afficher le bouton de démarrage
+        setTimeout(showStartButton, 1000); // Afficher le bouton après 4 secondes
+    }, 2000); // Durée de l'animation de zoom (2000ms = 2s)
+});
+
+// Reste du code JavaScript...
+
+
+// Reste du code JavaScript...
+
+  
+
+// Reste du code JavaScript...
+
+
+
+// Reste du code JavaScript...
+
+
 const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
