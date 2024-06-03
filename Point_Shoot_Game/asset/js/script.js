@@ -134,7 +134,8 @@ function drawScore() {
     ctx.fillStyle = 'black';
     ctx.fillText('Score: ' + score, 50, 75);
     ctx.fillStyle = 'white';
-    ctx.fillText('Score: ' + score, 55, 80);
+    ctx.fillText
+    ('Score: ' + score, 55, 80);
 }
 
 function drawGameOver() {
@@ -211,3 +212,4 @@ startButton.addEventListener('click', startGame);
 restartButton.addEventListener('click', startGame);
 
 startButton.style.display = 'block';
+restartButton.style.display = 'none'; // Masquer le bouton Restart au chargement de la page
