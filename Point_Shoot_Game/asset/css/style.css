@@ -3,6 +3,8 @@ body{
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    transition: background-color 1s ease;
+    z-index: 1;
 }
 
 canvas{
@@ -15,6 +17,11 @@ canvas{
 
 #collisionCanvas {
     opacity: 0;
+}
+
+.dark-bg {
+    background-color: #333;
+    z-index: 10;
 }
 
 body {
@@ -55,8 +62,29 @@ body {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
   }
   
+/* LOGO */
+
   @font-face {
     font-family: 'Garamond';
     src: url('https://fonts.googleapis.com/css2?family=Garamond:wght@400;700&display=swap');
   }
   
+  #logoContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0; /* Logo initiallement invisible */
+    transition: opacity 1s ease, transform 1s ease;
+  }
+  
+  #logo {
+    width: 350px; /* Taille initiale du logo */
+    transition: width 1s ease;
+  }
+  
+  #startButton {
+    display: none; /* Bouton de démarrage initialement caché */
+    opacity: 0; /* Opacité initiale à 0 */
+    transition: opacity 1s ease; /* Transition d'opacité sur 1 seconde avec une courbe d'accélération */
+}
