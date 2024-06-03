@@ -86,3 +86,5 @@ body {
     opacity: 0; /* Opacité initiale à 0 */
     transition: opacity 1s ease; /* Transition d'opacité sur 1 seconde avec une courbe d'accélération */
 }
+
+

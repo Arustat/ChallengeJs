@@ -1,34 +1,27 @@
 const logo = document.getElementById("logo");
 const logoContainer = document.getElementById("logoContainer");
 
-// Fonction pour afficher le bouton de démarrage après l'animation du logo
 function showStartButton() {
     startButton.style.opacity = '1';
 }
 
-// Animation du logo au chargement de la page
 window.addEventListener('load', function () {
-    // Ajouter la classe pour le fond gris foncé au chargement de la page
     document.body.classList.add('dark-bg');
-
-    // Affichage du logo avec fondu et effet de zoom
     logoContainer.style.opacity = '1';
-    logo.style.width = '500px'; // Zoom du logo
-    // Après un court délai, masquer le logo avec fondu
+    logo.style.width = '500px';
     setTimeout(function () {
-        // Transition pour afficher le fond coloré avec un fondu
         document.body.classList.remove('dark-bg');
-
         logoContainer.style.opacity = '0';
-        // Après l'animation de fondu, afficher le bouton de démarrage
-        setTimeout(showStartButton, 1000); // Afficher le bouton après 4 secondes
-    }, 2000); // Durée de l'animation de zoom (2000ms = 2s)
+        setTimeout(showStartButton, 1000);
+    }, 2000);
 });
 
 const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+const CANVAS_WIDTH = canvas.width ;
+const CANVAS_HEIGHT = canvas.height;
 const collisionCanvas = document.getElementById("collisionCanvas");
 const collisionCtx = collisionCanvas.getContext('2d');
 collisionCanvas.width = window.innerWidth;
@@ -37,17 +30,110 @@ collisionCanvas.height = window.innerHeight;
 const startButton = document.getElementById("startButton");
 const restartButton = document.getElementById("restartButton");
 
+const initialGameSpeed = 1
+let gameSpeed = initialGameSpeed;
+const speedIncreaseInterval = 10000;
+let timeSinceLastSpeedIncrease = 0;
+
+let initialRavenInterval = 1000;
+let ravenInterval = initialRavenInterval;
+const ravenIntervalDecrease = 100; 
+
+
 let score = 0;
 let gameOver = false;
 let timeToNextRaven = 0;
-let ravenInterval = 500;
 let lastTime = 0;
+let currentLayerSet = 0;
 
+const gameObjects = [];
 let ravens = [];
 let explosions = [];
 let particles = [];
 
 ctx.font = '50px Impact';
+
+window.addEventListener('resize', function() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    collisionCanvas.width = window.innerWidth;
+    collisionCanvas.height = window.innerHeight;
+});
+
+const layerSets = [
+    'asset/Clouds/Clouds1',
+    'asset/Clouds/Clouds2',
+    'asset/Clouds/Clouds4',
+    'asset/Clouds/Clouds5',
+    'asset/Clouds/Clouds6',
+    'asset/Clouds/Clouds7',
+    'asset/Clouds/Clouds8'
+];
+
+function loadLayerSet(path) {
+    return [
+        new Layer(loadImage(`${path}/1.png`), 0.2),
+        new Layer(loadImage(`${path}/2.png`), 0.4),
+        new Layer(loadImage(`${path}/3.png`), 0.6),
+        new Layer(loadImage(`${path}/4.png`), 0.8),
+    ];
+}
+
+function loadImage(src) {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => console.log(`Image ${src} loaded`);
+    img.onerror = () => console.log(`Failed to load image ${src}`);
+    return img;
+}
+
+let timeElapsed = 0;
+const timeToChangeBackground = 600;
+
+function changeBackground() {
+    timeElapsed++;
+    if (timeElapsed >= timeToChangeBackground && currentLayerSet < layerSets.length - 1) {
+        currentLayerSet++;
+        gameObjects.length = 0;
+        gameObjects.push(...loadLayerSet(`${layerSets[currentLayerSet]}`));
+        timeElapsed = 0;
+    }
+}
+
+function animateBackground() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    gameObjects.forEach(object => {
+        object.update();
+        object.draw();
+    });
+    requestAnimationFrame(animateBackground);
+}
+
+class Layer {
+    constructor(image, speedModifier) {
+        this.x = 0;
+        this.y = 0;
+        this.width = CANVAS_WIDTH;
+        this.height = CANVAS_HEIGHT;
+        this.image = image;
+        this.speedModifier = speedModifier;
+        this.speed = gameSpeed * this.speedModifier;
+    }
+
+    update() {
+        this.speed = gameSpeed * this.speedModifier;
+        if (this.x <= -this.width) {
+            this.x = 0;
+        }
+        this.x -= this.speed;
+    }
+
+    draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        ctx.drawImage(this.image, this.x + this.width, this.y, this.width, this.height);
+    }
+}
+
 
 class Raven {
     constructor() {
@@ -58,8 +144,8 @@ class Raven {
         this.height = this.spriteHeight * this.sizeModifier;
         this.x = canvas.width;
         this.y = Math.random() * (canvas.height - this.height);
-        this.directionX = Math.random() * 5 + 3;
-        this.directionY = Math.random() * 5 - 2.5;
+        this.baseDirectionX = Math.random() * 2 + 1; // Base speed in X direction (initially slow)
+        this.directionY = Math.random() * 5 - 2.5; // Speed in Y direction
         this.markedForDeletion = false;
         this.image = new Image();
         this.image.src = 'asset/raven.png';
@@ -76,7 +162,7 @@ class Raven {
         if (this.y < 0 || this.y > canvas.height - this.height) {
             this.directionY = this.directionY * -1;
         }
-        this.x -= this.directionX;
+        this.x -= this.baseDirectionX * (initialGameSpeed + gameSpeed - 1); // Adjusted speed calculation
         this.y += this.directionY;
         if (this.x < 0 - this.width) this.markedForDeletion = true;
         this.timeSinceFlap += deltatime;
@@ -161,26 +247,35 @@ function drawScore() {
     ctx.fillStyle = 'black';
     ctx.fillText('Score: ' + score, 50, 75);
     ctx.fillStyle = 'white';
-    ctx.fillText
-    ('Score: ' + score, 55, 80);
+    ctx.fillText('Score: ' + score, 55, 80);
 }
 
 function drawGameOver() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.textAlign = 'center';
-    ctx.fillStyle = 'black';
-    ctx.fillText("GAME OVER, your score is " + score, canvas.width / 2, canvas.height / 2);
     ctx.fillStyle = 'white';
-    ctx.fillText("GAME OVER, your score is " + score, canvas.width / 2 + 5, canvas.height / 2 + 5);
+    ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 100);
+    ctx.fillText("Your score is " + score, canvas.width / 2, canvas.height / 2);
+    
+    const gameOverMusic = new Audio('path/to/gameOverMusic.mp3');
+    gameOverMusic.loop = true;
+    gameOverMusic.volume = 0.5;
+    gameOverMusic.play();
+
     restartButton.style.display = 'block';
+    restartButton.style.position = 'absolute';
+    restartButton.style.left = '50%';
+    restartButton.style.top = '60%';
+    restartButton.style.transform = 'translate(-50%, -50%)';
 }
 
 window.addEventListener('click', function (e) {
-    const detectPixelColor = collisionCtx.getImageData(e.x, e.y, 1, 1);
+    const detectPixelColor = collisionCtx.getImageData(e.clientX, e.clientY, 1, 1);
     console.log(detectPixelColor);
     const pc = detectPixelColor.data;
     ravens.forEach(object => {
         if (object.randomColor[0] === pc[0] && object.randomColor[1] === pc[1] && object.randomColor[2] === pc[2]) {
-            //colision detected
             object.markedForDeletion = true;
             score++;
             explosions.push(new Explosion(object.x, object.y, object.width));
@@ -192,9 +287,17 @@ window.addEventListener('click', function (e) {
 function animate(timestamp) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     collisionCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+    gameObjects.forEach(object => {
+        object.update();
+        object.draw();
+    });
+
     let deltatime = timestamp - lastTime;
     lastTime = timestamp;
     timeToNextRaven += deltatime;
+    timeSinceLastSpeedIncrease += deltatime;
+
     if (timeToNextRaven > ravenInterval) {
         ravens.push(new Raven());
         timeToNextRaven = 0;
@@ -202,12 +305,22 @@ function animate(timestamp) {
             return a.width - b.width;
         });
     }
+
+    // Augmenter la vitesse de jeu après un certain intervalle de temps
+    if (timeSinceLastSpeedIncrease > speedIncreaseInterval) {
+        gameSpeed += 0.1; // Augmentez cette valeur pour ajuster la vitesse de progression
+        ravenInterval = Math.max(200, ravenInterval - ravenIntervalDecrease); // Réduire l'intervalle d'apparition des ravens
+        timeSinceLastSpeedIncrease = 0; // Réinitialiser le compteur de temps
+    }
+
     drawScore();
     [...particles, ...ravens, ...explosions].forEach(object => object.update(deltatime));
     [...particles, ...ravens, ...explosions].forEach(object => object.draw());
     ravens = ravens.filter(object => !object.markedForDeletion);
     explosions = explosions.filter(object => !object.markedForDeletion);
     particles = particles.filter(object => !object.markedForDeletion);
+    changeBackground(score);
+
     if (!gameOver) {
         requestAnimationFrame(animate);
     } else {
@@ -216,6 +329,8 @@ function animate(timestamp) {
 }
 
 function resetGame() {
+    gameSpeed = initialGameSpeed;
+    ravenInterval = initialRavenInterval;
     score = 0;
     gameOver = false;
     timeToNextRaven = 0;
@@ -226,6 +341,8 @@ function resetGame() {
     ctx.font = '50px Impact';
     ctx.textAlign = 'start';
     ctx.textBaseline = 'alphabetic';
+    gameObjects.length = 0;
+    gameObjects.push(...loadLayerSet(`${layerSets[1]}`));
 }
 
 function startGame() {
@@ -239,4 +356,7 @@ startButton.addEventListener('click', startGame);
 restartButton.addEventListener('click', startGame);
 
 startButton.style.display = 'block';
-restartButton.style.display = 'none'; // Masquer le bouton Restart au chargement de la page
+restartButton.style.display = 'none';
+
+
+
