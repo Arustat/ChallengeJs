@@ -16,3 +16,47 @@ canvas{
 #collisionCanvas {
     opacity: 0;
 }
+
+body {
+    font-family: 'Garamond', serif;
+  }
+  
+  .game-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 40px;
+    font-size: 24px;
+    font-family: 'Garamond', serif;
+    color: #fff;
+    background: linear-gradient(145deg, #6b4e16, #3d2b0a);
+    border: 2px solid #000;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    text-shadow: 2px 2px 4px #000;
+  }
+  
+  #startButton {
+    top: 40%;
+  }
+  
+  #restartButton {
+    top: 60%;
+  }
+  
+  .game-button:hover {
+    background: linear-gradient(145deg, #3d2b0a, #6b4e16);
+  }
+  
+  .game-button:active {
+    background: linear-gradient(145deg, #2c1f08, #553b11);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  }
+  
+  @font-face {
+    font-family: 'Garamond';
+    src: url('https://fonts.googleapis.com/css2?family=Garamond:wght@400;700&display=swap');
+  }
+  
